@@ -1,39 +1,42 @@
-// src/services/auth/FirebaseAuthService.ts
-import { signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
-import { auth, githubProvider } from "../firebase/config";
-import { type User } from "../models/User";
-import { type AuthService } from "./AuthService";
+// src/services/FirebaseAuthService.ts
+import { signInWithPopup, GithubAuthProvider, signOut } from "firebase/auth";
+import { auth } from "../firebase/config";
 
-export class FirebaseAuthService implements AuthService {
-    private currentUser: User | null = null;
+class FirebaseAuthService {
+    provider = new GithubAuthProvider();
 
-    async signInWithGithub(): Promise<User | null> {
-        try {
-        const result = await signInWithPopup(auth, githubProvider);
+    async signInWithGithub() {
+        const result = await signInWithPopup(auth, this.provider);
         const user = result.user;
 
-        const newUser: User = {
-            id: 0,
-            name: user.displayName || "",
-            email: user.email || "",
-            token: await user.getIdToken(),
-            is_active: true,
+        const credential = GithubAuthProvider.credentialFromResult(result);
+        const githubToken = credential?.accessToken;
+        const firebaseToken = await user.getIdToken();
+
+        const userData = {
+            id: user.uid,
+            name: user.displayName,
+            email: user.email,
+            photo: user.photoURL,
+            githubToken,
+            firebaseToken,
         };
 
-        this.currentUser = newUser;
-        return newUser;
-        } catch (error) {
-            console.error("Error al autenticar con GitHub:", error);
-            return null;
-        }
+        // Guardamos en localStorage
+        localStorage.setItem("authUser", JSON.stringify(userData));
+
+        return userData;
     }
 
-    async signOut(): Promise<void> {
-        await firebaseSignOut(auth);
-        this.currentUser = null;
+    async signOut() {
+        await signOut(auth);
+        localStorage.removeItem("authUser");
     }
 
-    getCurrentUser(): User | null {
-        return this.currentUser;
+    getStoredUser() {
+        const data = localStorage.getItem("authUser");
+        return data ? JSON.parse(data) : null;
     }
 }
+
+export default new FirebaseAuthService();
