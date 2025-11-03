@@ -8,7 +8,7 @@ interface GithubButtonProps {
     const GithubButton: React.FC<GithubButtonProps> = ({ onClick }) => {
     return (
         <button className="github-btn" onClick={onClick}>
-        <img src="/github-icon.svg" alt="GitHub" width="24" />
+        <img src="./src/assets/favicon.png" alt="GitHub" width="24" />
         Iniciar sesión con GitHub
         </button>
     );
