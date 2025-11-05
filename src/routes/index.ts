@@ -1,6 +1,7 @@
 import { lazy } from "react";
 
-const UpdateDigitalSignature = lazy(() => import('../pages/digitalSignature/UpdateDigitalSignature'));
+// const UpdateDigitalSignature = lazy(() => import('../pages/digitalSignature/Update'));
+const Update = lazy(() => import('../pages/Users/Update'));
 /*
 
 // 🔹 Signature (1:1) 
@@ -8,9 +9,9 @@ const UpdateDigitalSignature = lazy(() => import('../pages/digitalSignature/Upda
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // 🔹 Devices (1:N) 
-const ListDevices = lazy(() => import('../pages/devices/ListDevices'));     ❌
-const CreateDevice = lazy(() => import('../pages/devices/CreateDevice'));   ❌
-const UpdateDevice = lazy(() => import('../pages/devices/UpdateDevice'));   ❌
+const ListDevices = lazy(() => import('../pages/devices/List'));     ❌
+const CreateDevice = lazy(() => import('../pages/devices/Creat'));   ❌
+const UpdateDevice = lazy(() => import('../pages/devices/Update'));   ❌
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // 🔹 Security Answers (N:N) 
@@ -26,10 +27,12 @@ const UpdateAnswer = lazy(() => import('../pages/answers/UpdateAnswer'));   ❌
 */
 
 const coreRoutes = [
+
+    
     {
-        path: '/UpdateDigitalSignature',
-        title: 'Update Signature',
-        component: UpdateDigitalSignature,
+        path: '/User/Update',
+        title: 'Update USer',
+        component: Update,
     },
 
 

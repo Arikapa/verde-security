@@ -3,7 +3,8 @@ import axios from "axios";
 import FirebaseAuthService from "./FirebaseAuthService";
 
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    // baseURL: import.meta.env.VITE_API_URL, // Unicamente para pruebas locales
+    baseURL: "http://localhost:5000/api",
     headers: {
         "Content-Type": "application/json",
     },

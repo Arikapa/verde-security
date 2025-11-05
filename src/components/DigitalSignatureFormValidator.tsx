@@ -1,5 +1,6 @@
+import React from "react";
 import type { DigitalSignature } from "../models/DigitalSignature";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 interface DigitalSignatureFormProps {
@@ -9,91 +10,102 @@ interface DigitalSignatureFormProps {
     signature?: DigitalSignature | null;
 }
 
-const DigitalSignatureFormValidator: React.FC<DigitalSignatureFormProps> = ({mode, handleCreate, handleUpdate, signature,}) => {
-  // Convierte una imagen en base64
+const DigitalSignatureFormValidator: React.FC<DigitalSignatureFormProps> = ({
+    mode,
+    handleCreate,
+    handleUpdate,
+    signature,
+}) => {
+  // Función para convertir una imagen en Base64
     const toBase64 = (file: File): Promise<string> =>
         new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = (error) => reject(error);
-            reader.readAsDataURL(file);
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
         });
 
-const handleSubmit = (values: DigitalSignature) => {
-    if (mode == 1 && handleCreate) {
-        handleCreate(values); // Si `handleCreate` está definido, lo llamamos
-    } else if (mode === 2 && handleUpdate) {
-        handleUpdate(values); // Si `handleUpdate` está definido, lo llamamos
-    } else {
+    // Manejo del envío del formulario
+    const handleSubmit = (values: DigitalSignature) => {
+        if (mode === 1 && handleCreate) {
+        handleCreate(values);
+        } else if (mode === 2 && handleUpdate) {
+        handleUpdate(values);
+        } else {
         console.error("Modo inválido o función no definida");
-    }
-};
+        }
+    };
 
-return (
-    <Formik
-        // Inicializamos los valores del formulario, 
-        // si user tiene un valor (actualizacion), lo usamos para inicializar el formulario
-        // si user es nulo o indefinido (creación), usamos valores por defecto
-
-        initialValues={signature ?? { 
-            id: 0, 
-            photo: "" 
-        }}
-        
+    return (
+        <Formik
+        initialValues={
+            signature ?? {
+            id: 0,
+            photo: "",
+            }
+        }
         validationSchema={Yup.object({
-            photo: Yup.string().required("Debe subir una imagen"),
+            photo: Yup.string().required("Debe subir una imagen")
+                .test(
+                "fileSize",
+                "La imagen no debe superar los 2 MB",
+                (value) => {
+                if (!value) return false;
+                const sizeInBytes = atob(value.split(",")[1]).length;
+                return sizeInBytes < 2 * 1024 * 1024; // 2MB
+                }
+            ),
         })}
         onSubmit={handleSubmit}
-    >
-        {({ setFieldValue }) => (
-            <Form className="grid grid-cols-1 gap-4 p-6 bg-white rounded-md shadow-md">
-                {/* Carga de imagen */}
-                <div>
-                    <label htmlFor="photo" className="block text-lg font-medium text-gray-700">
-                    Subir firma digital
-                    </label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                            const file = e.currentTarget.files?.[0];
-                            if (file) {
-                                const base64 = await toBase64(file);
-                                setFieldValue("photo", base64);
-                            }
-                        }}
-                        className="w-full border rounded-md p-2"
-                    />
-                    <ErrorMessage name="photo" component="p" className="text-red-500 text-sm" />
+        >
+        {({ setFieldValue, values, isSubmitting }) => (
+            <Form className="p-4 bg-white rounded shadow-sm">
+            <div className="card p-3 border-0">
+                <h5 className="card-title mb-3">
+                {mode === 1 ? "Registrar firma digital" : "Actualizar firma digital"}
+                </h5>
+
+                {/* Campo de carga de imagen */}
+                <div className="mb-3">
+                <label htmlFor="photo" className="form-label">Subir firma digital</label>
+                <input type="file" accept="image/*" onChange={async (e) => {const file = e.currentTarget.files?.[0];
+                        if (file) {
+                            const base64 = await toBase64(file);
+                            setFieldValue("photo", base64);
+                        }
+                    }}
+                    className="form-control"
+                />
+                <ErrorMessage name="photo">{(msg) => <div className="form-text text-danger">{msg}</div>}</ErrorMessage>
                 </div>
 
-                {/* Vista previa de la imagen */}
-                <Field name="photo">
-                    {({ field }: any) =>
-                        field.value ? (
-                            <img
-                            src={field.value}
-                            alt="Vista previa de firma"
-                            className="w-40 h-40 object-contain border rounded-md mt-2"
-                            />
-                        ) : null
-                    }
-                </Field>
+                {/* Vista previa de la firma */}
+                {values.photo && (
+                    <div className="mb-3 text-center">
+                    <img src={values.photo} alt="Vista previa de firma" className="img-thumbnail" 
+                            style={{
+                                width: 180,
+                                height: 180,
+                                objectFit: "contain",
+                                border: "1px solid #dee2e6",
+                            }}
+                        />
+                    </div>  
+                )}
 
-                {/* Botón */}
-                <button type="submit" className="bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition">
-                    {mode === 1 ? "Crear Firma" : "Actualizar Firma"}
+                {/* Botón de envío */}
+                <button
+                type="submit"
+                className="btn btn-primary w-100"
+                disabled={isSubmitting}
+                >
+                {isSubmitting ? "Guardando..." : mode === 1 ? "Registrar Firma" : "Actualizar Firma"}
                 </button>
+            </div>
             </Form>
-    )}
-    </Formik>
-
+        )}
+        </Formik>
     );
 };
 
 export default DigitalSignatureFormValidator;
-
-
-// AnswerFormValidator y DeviceFormValidator siguen un patrón similar al de UserFormValidator y DigitalSignatureFormValidator, adaptando los campos y validaciones según las propiedades de los modelos Answer y Device respectivamente.
-
-// AnswerFormValidator y DeviceFormValidator

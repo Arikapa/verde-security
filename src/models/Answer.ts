@@ -1,8 +1,8 @@
 export interface Answer {
     id?: number;
     content?: string;
-    /*
-    questionId: number;
-    answerText: string;
-    */
+    //FK a SecurityQuestion
+    questionId?: number;  
+    //FK a User (antes tenías id_client)
+    userId?: number;      
 }
