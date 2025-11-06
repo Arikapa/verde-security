@@ -9,7 +9,7 @@ import {
     type User as FirebaseUser,
 } from "firebase/auth";
 
-// --- Config Firebase
+// --- Configuración Firebase (tuya)
 const firebaseConfig = {
     apiKey: "AIzaSyBZsgGSBX-dW9POR8MXi6yJhXuzkuRpilI",
     authDomain: "security-app-d3585.firebaseapp.com",
@@ -20,16 +20,18 @@ const firebaseConfig = {
     measurementId: "G-KR0KFJ5P21",
 };
 
+// Inicializar app (protegido para no reinicializar varias veces)
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 
+// Tipos
 type AuthUser = {
     uid: string;
     displayName?: string | null;
     email?: string | null;
     photoURL?: string | null;
     token?: string | null;
-} | null;
+    } | null;
 
 type AuthContextType = {
     user: AuthUser;
@@ -44,9 +46,9 @@ export const useAuth = (): AuthContextType => {
     const ctx = useContext(AuthContext);
     if (!ctx) throw new Error("useAuth must be used within AuthProvider");
     return ctx;
-};
+    };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<AuthUser>(null);
     const [loading, setLoading] = useState(true);
 
@@ -58,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
         }
 
+        // Obtener token (si lo necesitas para tu backend)
         const token = await fbUser.getIdToken();
 
         setUser({
@@ -67,10 +70,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             photoURL: fbUser.photoURL,
             token,
         });
-
-        console.log("------------ Usuario autenticado: -------------", fbUser.displayName || fbUser.email);
-        console.log("------------ Token de Firebase (JWT): -------------", token); // 👈 aquí lo imprime
-
         setLoading(false);
         });
 
@@ -83,20 +82,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const provider = new GithubAuthProvider();
         await signInWithPopup(auth, provider);
         } catch (err) {
-        console.error(err);
+        setLoading(false);
+        throw err;
         } finally {
         setLoading(false);
         }
     };
 
     const logout = async () => {
+        setLoading(true);
+        try {
         await signOut(auth);
         setUser(null);
+        } finally {
+        setLoading(false);
+        }
     };
 
-    return (
-        <AuthContext.Provider value={{ user, loading, loginWithGithub, logout }}>
-        {children}
-        </AuthContext.Provider>
-    );
+    const value: AuthContextType = {
+        user,
+        loading,
+        loginWithGithub,
+        logout,
+    };
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

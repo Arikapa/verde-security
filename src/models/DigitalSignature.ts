@@ -1,6 +1,6 @@
 export interface DigitalSignature {
     id?: number;
-    photo?: string;
+    photo?: File | null;
     // 🔹 Relación inversa 1:1 con User
     userId?: number; 
 }

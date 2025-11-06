@@ -10,7 +10,7 @@ export interface User {
     age?: number;
     city?: string;
     phone?: string;
-    is_active?: boolean;
+    is_active?: true;
     token?: string;
     sessions?: any[];
     // 🔹 Relación 1:1

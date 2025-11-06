@@ -1,32 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { answerService } from "../../services/AnswerService";
-import type { Answer } from "../../models/Answer";
+import { userService } from "../../services/userService";
+import type { User } from "../../models/User";
 import GenericTable from "../../components/GenericTable";
 
-const ListAnswers: React.FC = () => {
-    const [answers, setAnswers] = useState<Answer[]>([]);
+const ListUsers: React.FC = () => {
+    const [users, setUsers] = useState<User[]>([]);
     const [tableStyle, setTableStyle] = useState<"material" | "bootstrap" | "tailwind">("bootstrap");
     const navigate = useNavigate();
 
-    const loadAnswers = async () => {
+    const loadUsers = async () => {
         try {
-        const data = await answerService.getAll();
-        setAnswers(data);
+        const data = await userService.getAll();
+        setUsers(data);
         } catch {
-        Swal.fire("Error", "No se pudieron cargar las respuestas", "error");
+        Swal.fire("Error", "No se pudo cargar la lista de usuarios", "error");
         }
     };
-
-    useEffect(() => {
-        loadAnswers();
-    }, []);
 
     const handleDelete = async (id?: number) => {
         if (!id) return;
         const confirm = await Swal.fire({
-        title: "¿Eliminar respuesta?",
+        title: "¿Eliminar usuario?",
         text: "Esta acción no se puede deshacer",
         icon: "warning",
         showCancelButton: true,
@@ -34,24 +30,28 @@ const ListAnswers: React.FC = () => {
         cancelButtonText: "Cancelar",
         });
         if (confirm.isConfirmed) {
-        await answerService.remove(id);
-        loadAnswers();
-        Swal.fire("Eliminado", "Respuesta eliminada con éxito", "success");
+        await userService.remove(id);
+        loadUsers();
+        Swal.fire("Eliminado", "Usuario eliminado con éxito", "success");
         }
     };
 
-    const handleAction = (action: string, answer: Answer) => {
-        switch (action) {
+    const handleAction = (actionName: string, user: User) => {
+        switch (actionName) {
         case "edit":
-            navigate(`/answer/update/${answer.id}`);
+            navigate(`/user/update/${user.id}`);
             break;
         case "delete":
-            handleDelete(answer.id);
+            handleDelete(user.id);
             break;
         }
     };
 
-    const columns = ["id", "content", "questionId", "userId"];
+    useEffect(() => {
+        loadUsers();
+    }, []);
+
+    const columns = ["id", "name", "email"];
     const actions = [
         { name: "edit", label: "Editar", color: "secondary" as const },
         { name: "delete", label: "Eliminar", color: "error" as const },
@@ -59,11 +59,11 @@ const ListAnswers: React.FC = () => {
 
     return (
         <div className="container mt-4">
-        <h2 className="text-success text-center mb-4">Lista de Respuestas</h2>
+        <h2 className="text-success text-center mb-4">Lista de Usuarios</h2>
 
         <div className="d-flex justify-content-between align-items-center mb-3">
-            <Link to="/answer/create" className="btn btn-success">
-            + Nueva Respuesta
+            <Link to="/user/create" className="btn btn-success">
+            + Nuevo Usuario
             </Link>
 
             {/* Selector de estilo de tabla */}
@@ -81,18 +81,14 @@ const ListAnswers: React.FC = () => {
         </div>
 
         <GenericTable
-            data={answers}
+            data={users}
             columns={columns}
             actions={actions}
             onAction={handleAction}
             styleType={tableStyle}
         />
-
-        {!answers.length && (
-            <p className="text-center mt-3">No hay respuestas registradas</p>
-        )}
         </div>
     );
 };
 
-export default ListAnswers;
+export default ListUsers;

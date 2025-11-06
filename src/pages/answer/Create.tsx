@@ -1,51 +1,32 @@
 import React from "react";
-import { type Answer } from "../../models/Answer";
-import AnswerFormValidator from "../../components/AnswerFormValidator";
 import Swal from "sweetalert2";
 import { answerService } from "../../services/AnswerService";
-import Breadcrumb from "../../components/Breadcrumb";
 import { useNavigate } from "react-router-dom";
+import AnswerFormValidator from "../../components/AnswerFormValidator";
+import type { Answer } from "../../models/Answer";
 
 const CreateAnswer: React.FC = () => {
     const navigate = useNavigate();
+    const initialValues: Answer = {
+        content: "",
+        questionId: undefined,
+        userId: undefined,
+    };
 
-    // Lógica de creación
-    const handleCreateAnswer = async (answer: Answer) => {
+    const handleSubmit = async (values: Answer) => {
         try {
-            const createdAnswer = await answerService.createAnswer(answer);
-
-            if (createdAnswer) {
-                Swal.fire({
-                    title: "Completado",
-                    text: "La respuesta se ha creado correctamente.",
-                    icon: "success",
-                    timer: 3000,
-                });
-                console.log("Respuesta creada con éxito:", createdAnswer);
-                navigate("/ListAnswers"); // Redirigir a la lista de respuestas
-            } else {
-                Swal.fire({
-                    title: "Error",
-                    text: "Ocurrió un problema al crear la respuesta.",
-                    icon: "error",
-                    timer: 3000,
-                });
-            }
+            await answerService.create(values.userId!, values.questionId!, { content: values.content });
+            Swal.fire("Éxito", "Respuesta creada correctamente", "success");
+            setTimeout(() => navigate("/answer/list"), 800);
         } catch (error) {
-            Swal.fire({
-                title: "Error",
-                text: "No se pudo crear la respuesta.",
-                icon: "error",
-                timer: 3000,
-            });
+            Swal.fire("Error", "No se pudo crear la respuesta", "error");
         }
     };
 
     return (
-        <div>
-            <h2>Crear Respuesta</h2>
-            <Breadcrumb pageName="Crear Respuesta" />
-            <AnswerFormValidator handleCreate={handleCreateAnswer} mode={1} />
+        <div className="container mt-4">
+        <h2 className="text-success mb-4 text-center">Registrar Respuesta</h2>
+        <AnswerFormValidator initialValues={initialValues} onSubmit={handleSubmit} />
         </div>
     );
 };

@@ -1,75 +1,44 @@
-
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-
-import { userService } from "../../services/userService";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-
-import { type User } from '../../models/User';
-import UserFormValidator from '../../components/UserFormValidator';
-import Breadcrumb from "../../components/Breadcrumb";
+import { useParams } from "react-router-dom";
+import { userService } from "../../services/userService";
+import UserFormValidator from "../../components/UserFormValidator";
+import type { User } from "../../models/User";
+import { useNavigate } from "react-router-dom";
 
 const UpdateUser: React.FC = () => {
-    const { id } = useParams(); // Obtener el ID de la URL
-    
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
     const [user, setUser] = useState<User | null>(null);
 
-    // Cargar datos del usuario después del montaje
     useEffect(() => {
-        console.log("Id->"+id)
-        const fetchUser = async () => {
-            if (!id) return; // Evitar errores si el ID no está disponible
-            const userData = await userService.getUserById(parseInt(id));
-            setUser(userData);
-        };
-
-        fetchUser();
+        if (id) {
+        userService.getById(Number(id)).then(setUser).catch(() => {
+            Swal.fire("Error", "No se pudo cargar el usuario", "error");
+        });
+        }
     }, [id]);
 
-    const handleUpdateUser = async (theUser: User) => {
+    const handleSubmit = async (values: User) => {
         try {
-            const updatedUser = await userService.updateUser(theUser.id || 0, theUser);
-            if (updatedUser) {
-                Swal.fire({
-                    title: "Completado",
-                    text: "Se ha actualizado correctamente el registro",
-                    icon: "success",
-                    timer: 3000
-                });
-                navigate("/ListUsers"); // Redirección en React Router
-            } else {
-                Swal.fire({
-                    title: "Error",
-                    text: "Existe un problema al momento de actualizar el registro",
-                    icon: "error",
-                    timer: 3000
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                title: "Error",
-                text: "Existe un problema al momento de actualizar el registro",
-                icon: "error",
-                timer: 3000
-            });
+        await userService.update(Number(id), values);
+        Swal.fire("Éxito", "Usuario actualizado correctamente", "success");
+        setTimeout(() => navigate("/user/list"), 800);
+        } catch {
+        Swal.fire("Error", "No se pudo actualizar el usuario", "error");
         }
     };
 
-    if (!user) {
-        return <div>Cargando...</div>; // Muestra un mensaje de carga mientras se obtienen los datos
-    }
-
     return (
-        <>
-            <Breadcrumb pageName="Actualizar Usuario" />
-            <UserFormValidator
-                handleUpdate={handleUpdateUser}
-                mode={2} // 2 significa actualización
-                user={user}
-            />
-        </>
+        <div className="container mt-4">
+        <h2 className="text-success mb-4 text-center">Actualizar Usuario</h2>
+        {user ? (
+            <UserFormValidator initialValues={user} onSubmit={handleSubmit} />
+        ) : (
+            <p>Cargando...</p>
+        )}
+        </div>
     );
-};
+    };
 
 export default UpdateUser;

@@ -1,85 +1,84 @@
 import { lazy } from "react";
 
-// const UpdateDigitalSignature = lazy(() => import('../pages/digitalSignature/Update'));
+
 const Update = lazy(() => import('../pages/Users/Update'));
-/*
+const CreateUser = lazy(() => import('../pages/Users/Create'));
+const ListUsers = lazy(() => import('../pages/Users/List'));
+const CreateDevice = lazy(() => import('../pages/devices/Create'));
+const UpdateDevice = lazy(() => import('../pages/devices/Update'));
+const ListDevices = lazy(() => import('../pages/devices/List'));
+const CreateDigitalSignature = lazy(() => import('../pages/digitalSignature/Create'));
+const UpdateDigitalSignature = lazy(() => import('../pages/digitalSignature/Update'));
+const ListDigitalSignatures = lazy(() => import('../pages/digitalSignature/List'));
+const CreateSecurityQuestion = lazy(() => import('../pages/securityQuestions/Create'));
+const UpdateSecurityQuestion = lazy(() => import('../pages/securityQuestions/Update'));
+const ListSecurityQuestions = lazy(() => import('../pages/securityQuestions/List'));
+const CreateAnswer = lazy(() => import('../pages/answer/Create'));
+const UpdateAnswer = lazy(() => import('../pages/answer/Update'));
+const ListAnswers = lazy(() => import('../pages/answer/List'));
 
-// 🔹 Signature (1:1) 
-const UpdateDigitalSignature = lazy(() => import('../pages/digitalSignature/UpdateDigitalSignature'));  ✅
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// 🔹 Devices (1:N) 
-const ListDevices = lazy(() => import('../pages/devices/List'));     ❌
-const CreateDevice = lazy(() => import('../pages/devices/Creat'));   ❌
-const UpdateDevice = lazy(() => import('../pages/devices/Update'));   ❌
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// 🔹 Security Answers (N:N) 
-const ListAnswers = lazy(() => import('../pages/answers/ListAnswers'));     ❌
-const CreateAnswer = lazy(() => import('../pages/answers/CreateAnswer'));   ❌
-const UpdateAnswer = lazy(() => import('../pages/answers/UpdateAnswer'));   ❌
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-*/
 
 const coreRoutes = [
+    {   path: "/user/create", 
+        title: "Crear Usuario", 
+        component: CreateUser },
 
-    
-    {
-        path: '/User/Update',
-        title: 'Update USer',
-        component: Update,
-    },
+    {   path: "/user/update/:id", 
+        title: "Actualizar Usuario", 
+        component: Update },
+
+    {   path: "/user/list", 
+        title: "Usuarios", 
+        component: ListUsers },
 
 
-    /*
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-     // 🔹 FIRMA DIGITAL (1:1) 
-    {
-        path: '/UpdateDigitalSignature',
-        title: 'Update Signature',
-        component: UpdateDigitalSignature,
-    },✅
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // 🔹 DISPOSITIVOS (1:N) 
-    {
-        path: '/Devices',
-        title: 'Devices List',
-        component: ListDevices,
-    },  ❌
-    {
-        path: '/CreateDevice',
-        title: 'Create Device',
-        component: CreateDevice,
-    },  ❌
-    {
-        path: '/UpdateDevice/:id',
-        title: 'Update Device',
-        component: UpdateDevice,
-    },  ❌
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // 🔹 PREGUNTAS Y RESPUESTAS DE SEGURIDAD (N:N) 
-    {
-        path: '/Answers',
-        title: 'Security Answers',
-        component: ListAnswers,
-    },  ❌
-    {
-        path: '/CreateAnswer',
-        title: 'Create Security Answer',
-        component: CreateAnswer,
-    },  ❌
-    {
-        path: '/UpdateAnswer/:id',
-        title: 'Update Security Answer',
-        component: UpdateAnswer,
-    },  ❌
-    
-    */
+    {   path: "/device/create", 
+        title: "Crear Dispositivo", 
+        component: CreateDevice },
+
+    {   path: "/device/update/:id", 
+        title: "Actualizar Dispositivo", 
+        component: UpdateDevice },
+    {   path: "/device/list", 
+        title: "Dispositivos", 
+        component: ListDevices },
+
+    {   path: "/digitalSignature/create", 
+        title: "Crear Firma", 
+        component: CreateDigitalSignature },
+
+    {   path: "/digitalSignature/update/:id", 
+        title: "Actualizar Firma", 
+        component: UpdateDigitalSignature },
+
+    {   path: "/digitalSignature/list", 
+        title: "Firmas", 
+        component: ListDigitalSignatures },
+
+    {   path: "/securityQuestion/create", 
+        title: "Crear Pregunta", 
+        component: CreateSecurityQuestion },
+
+    {   path: "/securityQuestion/update/:id", 
+        title: "Actualizar Pregunta", 
+        component: UpdateSecurityQuestion },
+
+    {   path: "/securityQuestion/list", 
+        title: "Preguntas", 
+        component: ListSecurityQuestions },
+
+    {   path: "/answer/create", 
+        title: "Crear Respuesta", 
+        component: CreateAnswer },
+
+    {   path: "/answer/update/:id", 
+        title: "Actualizar Respuesta", 
+        component: UpdateAnswer },
+
+    {   path: "/answer/list", 
+        title: "Respuestas", 
+        component: ListAnswers },
 ];
 
 const routes = [...coreRoutes];

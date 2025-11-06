@@ -1,0 +1,29 @@
+/* src/styles/themeSwitcher.css */
+
+/* Contenedor general */
+.breadcrumb-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Estilo del breadcrumb */
+.breadcrumb {
+    margin-bottom: 0.5rem;
+}
+
+/* Botón de cambio de tema */
+.theme-toggle-btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #198754;
+    color: #fff;
+    transition: 0.3s;
+}
+
+.theme-toggle-btn:hover {
+    background-color: #146c43;
+}

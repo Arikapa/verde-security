@@ -1,111 +1,89 @@
-import React from "react";
-import type { DigitalSignature } from "../models/DigitalSignature";
-import { Formik, Form, ErrorMessage } from "formik";
+import React, { useEffect, useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import type { DigitalSignature } from "../models/DigitalSignature";
+import type { User } from "../models/User";
+import { userService } from "../services/userService";
 
-interface DigitalSignatureFormProps {
-    mode: number; // 1 = crear, 2 = actualizar
-    handleCreate?: (values: DigitalSignature) => void;
-    handleUpdate?: (values: DigitalSignature) => void;
-    signature?: DigitalSignature | null;
+interface Props {
+  initialValues: DigitalSignature;
+  onSubmit: (values: DigitalSignature) => void;
 }
 
-const DigitalSignatureFormValidator: React.FC<DigitalSignatureFormProps> = ({
-    mode,
-    handleCreate,
-    handleUpdate,
-    signature,
-}) => {
-  // Función para convertir una imagen en Base64
-    const toBase64 = (file: File): Promise<string> =>
-        new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
-        });
+const DigitalSignatureFormValidator: React.FC<Props> = ({ initialValues, onSubmit }) => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [preview, setPreview] = useState<string | null>(null);
 
-    // Manejo del envío del formulario
-    const handleSubmit = (values: DigitalSignature) => {
-        if (mode === 1 && handleCreate) {
-        handleCreate(values);
-        } else if (mode === 2 && handleUpdate) {
-        handleUpdate(values);
-        } else {
-        console.error("Modo inválido o función no definida");
-        }
-    };
+  useEffect(() => {
+    userService.getAll().then(setUsers).catch(() => setUsers([]));
+  }, []);
 
-    return (
-        <Formik
-        initialValues={
-            signature ?? {
-            id: 0,
-            photo: "",
-            }
-        }
-        validationSchema={Yup.object({
-            photo: Yup.string().required("Debe subir una imagen")
-                .test(
-                "fileSize",
-                "La imagen no debe superar los 2 MB",
-                (value) => {
-                if (!value) return false;
-                const sizeInBytes = atob(value.split(",")[1]).length;
-                return sizeInBytes < 2 * 1024 * 1024; // 2MB
-                }
-            ),
-        })}
-        onSubmit={handleSubmit}
-        >
-        {({ setFieldValue, values, isSubmitting }) => (
-            <Form className="p-4 bg-white rounded shadow-sm">
-            <div className="card p-3 border-0">
-                <h5 className="card-title mb-3">
-                {mode === 1 ? "Registrar firma digital" : "Actualizar firma digital"}
-                </h5>
+  const validationSchema = Yup.object({
+    photo: Yup.mixed().required("Debe subir una imagen"),
+    userId: Yup.number().required("Debe seleccionar un usuario"),
+  });
 
-                {/* Campo de carga de imagen */}
-                <div className="mb-3">
-                <label htmlFor="photo" className="form-label">Subir firma digital</label>
-                <input type="file" accept="image/*" onChange={async (e) => {const file = e.currentTarget.files?.[0];
-                        if (file) {
-                            const base64 = await toBase64(file);
-                            setFieldValue("photo", base64);
-                        }
-                    }}
-                    className="form-control"
-                />
-                <ErrorMessage name="photo">{(msg) => <div className="form-text text-danger">{msg}</div>}</ErrorMessage>
-                </div>
+  return (
+    <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={validationSchema}>
+      {({ isSubmitting, setFieldValue, values }) => {
+        // ⚡ Crear y liberar la URL de vista previa
+        useEffect(() => {
+          if (values.photo instanceof File) {
+            const objectUrl = URL.createObjectURL(values.photo);
+            setPreview(objectUrl);
+            return () => URL.revokeObjectURL(objectUrl);
+          } else {
+            setPreview(null);
+          }
+        }, [values.photo]);
 
-                {/* Vista previa de la firma */}
-                {values.photo && (
-                    <div className="mb-3 text-center">
-                    <img src={values.photo} alt="Vista previa de firma" className="img-thumbnail" 
-                            style={{
-                                width: 180,
-                                height: 180,
-                                objectFit: "contain",
-                                border: "1px solid #dee2e6",
-                            }}
-                        />
-                    </div>  
-                )}
-
-                {/* Botón de envío */}
-                <button
-                type="submit"
-                className="btn btn-primary w-100"
-                disabled={isSubmitting}
-                >
-                {isSubmitting ? "Guardando..." : mode === 1 ? "Registrar Firma" : "Actualizar Firma"}
-                </button>
+        return (
+          <Form className="p-3 border rounded bg-light shadow-sm">
+            <div className="mb-3">
+              <label className="form-label">Usuario</label>
+              <Field as="select" name="userId" className="form-select">
+                <option value="">Seleccione un usuario</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.email})
+                  </option>
+                ))}
+              </Field>
+              <ErrorMessage name="userId" component="div" className="text-danger" />
             </div>
-            </Form>
-        )}
-        </Formik>
-    );
+
+            <div className="mb-3">
+              <label className="form-label">Subir Firma Digital</label>
+              <input
+                type="file"
+                className="form-control"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.currentTarget.files?.[0] || null;
+                  setFieldValue("photo", file);
+                }}
+              />
+              <ErrorMessage name="photo" component="div" className="text-danger" />
+            </div>
+
+            {preview && (
+              <div className="text-center mb-3">
+                <img
+                  src={preview}
+                  alt="Vista previa"
+                  style={{ maxHeight: 150, borderRadius: 8 }}
+                />
+              </div>
+            )}
+
+            <button type="submit" disabled={isSubmitting} className="btn btn-success w-100">
+              Guardar Firma
+            </button>
+          </Form>
+        );
+      }}
+    </Formik>
+  );
 };
 
 export default DigitalSignatureFormValidator;
